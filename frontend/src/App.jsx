@@ -369,25 +369,15 @@ http.createServer((req, res) => {
   // ── Manejo de cambios de campo ──
   const handleFieldChange = (field, value) => {
     setForm(f => ({ ...f, [field]: value }))
-
-    if (touched[field]) {
-      const error = (() => {
-        switch (field) {
-          case 'name': return validateName(value)
-          case 'language': return validateLanguage(value)
-          case 'description': return validateDescription(value)
-          case 'code': return validateCode(value)
-          default: return null
-        }
-      })()
-
-      if (error) setErrors(e => ({ ...e, [field]: error }))
-      else setErrors(e => { const ne = { ...e }; delete ne[field]; return ne })
-
-      const warning = field === 'code' ? check8080Warning(value) : null
-      if (warning) setWarnings(w => ({ ...w, [field]: warning }))
-      else setWarnings(w => { const nw = { ...w }; delete nw[field]; return nw })
-    }
+    setErrors(e => {
+      const ne = { ...e }
+      delete ne[field]
+      delete ne._submit
+      return ne
+    })
+    const warning = field === 'code' ? check8080Warning(value) : null
+    if (warning) setWarnings(w => ({ ...w, [field]: warning }))
+    else setWarnings(w => { const nw = { ...w }; delete nw[field]; return nw })
   }
 
   // ── Manejo de blur de campo ──
@@ -443,7 +433,15 @@ http.createServer((req, res) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
-      if (!res.ok) throw new Error((await res.json()).message || 'No se pudo crear el microservicio. Revisa los datos y vuelve a intentar.')
+      if (!res.ok) {
+        const errData = await res.json()
+        if (res.status === 409) {
+          setErrors(e => ({ ...e, name: errData.message }))
+          setTouched(t => ({ ...t, name: true }))
+          return
+        }
+        throw new Error(errData.message || 'No se pudo crear el microservicio. Revisa los datos y vuelve a intentar.')
+      }
       const data = await res.json()
       setSuccess(`Microservicio "${form.name}" creado y desplegado exitosamente`)
       setForm({ name: '', description: '', language: 'Python', code: '' })
@@ -663,10 +661,10 @@ function ListaView({ services, onAction, loading, onSwitchTab }) {
           {/* Acciones */}
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             {svc.status === 'activo'
-              ? <Btn small variant="secondary" onClick={() => onAction(svc.id, 'stop')}>Pausar</Btn>
-              : <Btn small variant="success" onClick={() => onAction(svc.id, 'start')}>Activar</Btn>
+              ? <button title="Pausar" onClick={() => onAction(svc.id, 'stop')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
+              : <button title="Activar" onClick={() => onAction(svc.id, 'start')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="#00ff88" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
             }
-            <Btn small variant="danger" onClick={() => onAction(svc.id, 'delete')}>Eliminar</Btn>
+            <button title="Eliminar" onClick={() => onAction(svc.id, 'delete')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
           </div>
         </div>
       ))}
@@ -724,8 +722,8 @@ export default function App() {
   }
 
   const TABS = [
-    { id: 'lista', label: '📋 Mis servicios' },
-    { id: 'nuevo', label: '⚡ Nuevo' },
+    { id: 'lista', label: 'Mis servicios' },
+    { id: 'nuevo', label: 'Nuevo' },
   ]
 
   return (
@@ -757,22 +755,13 @@ export default function App() {
                 color: tab === t.id ? '#e2e8f0' : '#64748b',
                 fontSize: 13, fontFamily: "'Syne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 600,
                 transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', gap: 6,
               }}
             >
               {t.id === 'lista' ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"></line>
-                  <line x1="8" y1="18" x2="21" y2="18"></line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               )}
               {t.label}
             </button>
