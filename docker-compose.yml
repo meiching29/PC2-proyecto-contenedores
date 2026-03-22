@@ -1,29 +1,36 @@
 version: "3.9"
 
 services:
+
+  # ── Frontend: Dashboard en React ──────────────────────────────────
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
-    depends_on:
-      - backend
     environment:
       - VITE_API_URL=http://localhost:4000
+    depends_on:
+      - backend
 
+  # ── Backend: Orquestador Node.js + Express ────────────────────────
   backend:
-    # Descomenta la línea de abajo cuando tengan el backend listo:
-    # build: ./backend
-    image: node:20-alpine
-    working_dir: /app
-    command: sh -c "echo 'Backend placeholder - reemplazar con el build real'"
+    build: ./backend
     ports:
       - "4000:4000"
+    environment:
+      # En Windows Docker expone su API por TCP.
+      # El backend usa esta variable para conectarse a Docker.
+      - DOCKER_HOST=tcp://host.docker.internal:2375
+    # Esto permite que el contenedor del backend acceda
+    # al Docker del host (necesario para crear contenedores dinámicamente)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Carpeta donde se guardan los builds temporales de cada microservicio
+      - ./backend/builds:/app/builds
+      # Archivo de registro de microservicios (persiste entre reinicios)
+      - ./backend/services.json:/app/services.json
 
-  # Este volumen especial permite que el backend controle Docker
-  # (crear/eliminar contenedores de microservicios dinámicamente)
 networks:
   default:
     name: microservices-net
-
-volumes:
-  docker-socket:

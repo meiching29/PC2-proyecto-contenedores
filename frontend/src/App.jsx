@@ -530,10 +530,76 @@ function ListaView({ services, onAction, loading }) {
           {/* Acciones */}
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             {svc.status === 'activo'
-              ? <Btn small variant="secondary" onClick={() => onAction(svc.id, 'stop')}>Pausar</Btn>
-              : <Btn small variant="success"   onClick={() => onAction(svc.id, 'start')}>Activar</Btn>
+              ? (
+                <button
+                  title="Pausar"
+                  onClick={() => onAction(svc.id, 'stop')}
+                  style={{
+                    width: 32, height: 32,
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: 6,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#94a3b8',
+                    transition: 'background 0.2s',
+                    padding: 0
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                  </svg>
+                </button>
+              )
+              : (
+                <button
+                  title="Activar"
+                  onClick={() => onAction(svc.id, 'start')}
+                  style={{
+                    width: 32, height: 32,
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: 6,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#00ff88',
+                    transition: 'background 0.2s',
+                    padding: 0
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </button>
+              )
             }
-            <Btn small variant="danger" onClick={() => onAction(svc.id, 'delete')}>Eliminar</Btn>
+            <button
+              title="Eliminar"
+              onClick={() => onAction(svc.id, 'delete')}
+              style={{
+                width: 32, height: 32,
+                background: 'transparent',
+                border: 'none',
+                borderRadius: 6,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#ff4444',
+                transition: 'background 0.2s',
+                padding: 0
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
           </div>
         </div>
       ))}
@@ -584,8 +650,8 @@ export default function App() {
   }
 
   const TABS = [
-    { id: 'lista', label: '📋 Mis servicios' },
-    { id: 'nuevo', label: '⚡ Nuevo' },
+    { id: 'lista', label: 'Mis servicios' },
+    { id: 'nuevo', label: 'Nuevo' },
   ]
 
   return (
@@ -617,8 +683,24 @@ export default function App() {
                 color: tab === t.id ? '#e2e8f0' : '#64748b',
                 fontSize: 13, fontFamily: "'Syne', sans-serif", fontWeight: 600,
                 transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', gap: 6,
               }}
             >
+              {t.id === 'lista' ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              )}
               {t.label}
             </button>
           ))}

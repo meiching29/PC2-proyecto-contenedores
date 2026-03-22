@@ -9,10 +9,21 @@ const app = express()
 const PORT = 4000
 
 // ── Conexión a Docker ──────────────────────────────────────────────
-// En Windows usa el socket TCP. En Linux/Mac usa el socket Unix.
-const docker = process.platform === 'win32'
-    ? new Docker({ host: '127.0.0.1', port: 2375 })
-    : new Docker({ socketPath: '/var/run/docker.sock' })
+// Usa DOCKER_HOST si está definido (dentro de Docker en Windows)
+// Si no, detecta automáticamente según el sistema operativo
+function createDockerConnection() {
+    if (process.env.DOCKER_HOST) {
+        // Formato: tcp://host.docker.internal:2375
+        const url = new URL(process.env.DOCKER_HOST)
+        return new Docker({ host: url.hostname, port: parseInt(url.port) })
+    }
+    if (process.platform === 'win32') {
+        return new Docker({ host: '127.0.0.1', port: 2375 })
+    }
+    return new Docker({ socketPath: '/var/run/docker.sock' })
+}
+
+const docker = createDockerConnection()
 
 // ── Middleware ─────────────────────────────────────────────────────
 app.use(cors())
@@ -226,7 +237,7 @@ app.delete('/microservices/:id', async (req, res) => {
 
 // ── Arrancar servidor ──────────────────────────────────────────────
 app.listen(PORT, () => {
-    console.log(`\n🚀 Backend corriendo en http://localhost:${PORT}`)
+    console.log(`\n Backend corriendo en http://localhost:${PORT}`)
     console.log(`   Conectado a Docker: ${process.platform === 'win32' ? 'TCP 2375' : 'Unix socket'}`)
     console.log(`   Endpoints disponibles:`)
     console.log(`   GET    /microservices`)
