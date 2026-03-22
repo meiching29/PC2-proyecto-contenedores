@@ -215,9 +215,9 @@ const GlobalStyles = () => (
 
 // ── Colores de estado ──
 const STATUS_COLORS = {
-  activo:   { bg: '#0a2a1a', border: '#00ff88', text: '#00ff88' },
+  activo: { bg: '#0a2a1a', border: '#00ff88', text: '#00ff88' },
   inactivo: { bg: '#1a1a0a', border: '#ffaa00', text: '#ffaa00' },
-  error:    { bg: '#2a0a0a', border: '#ff4444', text: '#ff4444' },
+  error: { bg: '#2a0a0a', border: '#ff4444', text: '#ff4444' },
 }
 
 const LANGUAGES = ['Python', 'Node.js']
@@ -290,10 +290,10 @@ function StatusBadge({ status }) {
 // ── Componente: Botón ──
 function Btn({ children, onClick, variant = 'primary', disabled, small, style = {} }) {
   const variants = {
-    primary:   { background: '#00d4ff', color: '#080c10', padding: small ? '6px 14px' : '10px 22px', fontSize: small ? 12 : 14 },
-    danger:    { background: 'transparent', color: '#ff4444', border: '1px solid #ff4444', padding: small ? '5px 12px' : '9px 20px', fontSize: small ? 12 : 14 },
+    primary: { background: '#00d4ff', color: '#080c10', padding: small ? '6px 14px' : '10px 22px', fontSize: small ? 12 : 14 },
+    danger: { background: 'transparent', color: '#ff4444', border: '1px solid #ff4444', padding: small ? '5px 12px' : '9px 20px', fontSize: small ? 12 : 14 },
     secondary: { background: 'transparent', color: '#94a3b8', border: '1px solid #1e2d3d', padding: small ? '5px 12px' : '9px 20px', fontSize: small ? 12 : 14 },
-    success:   { background: '#00ff88', color: '#080c10', padding: small ? '5px 12px' : '9px 20px', fontSize: small ? 12 : 14, fontWeight: 600 },
+    success: { background: '#00ff88', color: '#080c10', padding: small ? '5px 12px' : '9px 20px', fontSize: small ? 12 : 14, fontWeight: 600 },
   }
   return (
     <button onClick={disabled ? undefined : onClick} style={{ ...variants[variant], cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1, fontFamily: "'Syne', sans-serif", ...style }}>
@@ -372,7 +372,7 @@ http.createServer((req, res) => {
 
     if (touched[field]) {
       const error = (() => {
-        switch(field) {
+        switch (field) {
           case 'name': return validateName(value)
           case 'language': return validateLanguage(value)
           case 'description': return validateDescription(value)
@@ -395,7 +395,7 @@ http.createServer((req, res) => {
     setTouched(t => ({ ...t, [field]: true }))
 
     const error = (() => {
-      switch(field) {
+      switch (field) {
         case 'name': return validateName(form[field])
         case 'language': return validateLanguage(form[field])
         case 'description': return validateDescription(form[field])
@@ -572,7 +572,7 @@ http.createServer((req, res) => {
               Creando contenedor...
             </>
           ) : (
-             <><span>{Icons.play}</span> Crear y desplegar</>
+            <><span>{Icons.play}</span> Crear y desplegar</>
           )}
         </Btn>
       </div>
@@ -661,22 +661,12 @@ function ListaView({ services, onAction, loading, onSwitchTab }) {
           </div>
 
           {/* Acciones */}
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
-            {confirmDeleteId === svc.id ? (
-              <>
-                <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600, marginRight: 8 }}>¿Seguro que deseas borrarlo?</span>
-                <Btn small variant="danger" onClick={() => onAction(svc.id, 'delete')}>Sí, borrar</Btn>
-                <Btn small variant="secondary" onClick={() => setConfirmDeleteId(null)}>Mejor no</Btn>
-              </>
-            ) : (
-              <>
-                {svc.status === 'activo'
-                  ? <button className="icon-btn" title="Pausar" onClick={() => onAction(svc.id, 'stop')}>{Icons.pause}</button>
-                  : <button className="icon-btn success" title="Activar" onClick={() => onAction(svc.id, 'start')}>{Icons.play}</button>
-                }
-                <button className="icon-btn danger" title="Eliminar" onClick={() => setConfirmDeleteId(svc.id)}>{Icons.trash}</button>
-              </>
-            )}
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            {svc.status === 'activo'
+              ? <Btn small variant="secondary" onClick={() => onAction(svc.id, 'stop')}>Pausar</Btn>
+              : <Btn small variant="success" onClick={() => onAction(svc.id, 'start')}>Activar</Btn>
+            }
+            <Btn small variant="danger" onClick={() => onAction(svc.id, 'delete')}>Eliminar</Btn>
           </div>
         </div>
       ))}
@@ -697,7 +687,7 @@ export default function App() {
       const res = await fetch(`${API_URL}/microservices`)
       if (res.ok) setServices(await res.json())
       else throw new Error('Error al cargar microservicios')
-    } catch { 
+    } catch {
       setGlobalError('No se pudo cargar la lista de microservicios.')
     }
     finally { setLoadingList(false) }
@@ -723,8 +713,8 @@ export default function App() {
       const res = await fetch(path, { method })
       if (!res.ok) throw new Error('Error en la operación del servidor.')
       if (res.ok) fetchServices()
-    } catch { 
-      setGlobalError('Hubo un problema al ejecutar la acción solicitada.') 
+    } catch {
+      setGlobalError('Hubo un problema al ejecutar la acción solicitada.')
     }
   }
 
@@ -734,8 +724,8 @@ export default function App() {
   }
 
   const TABS = [
-    { id: 'lista', label: <><span>{Icons.list}</span> Mis servicios</> },
-    { id: 'nuevo', label: <><span>{Icons.plus}</span> Nuevo</> },
+    { id: 'lista', label: '📋 Mis servicios' },
+    { id: 'nuevo', label: '⚡ Nuevo' },
   ]
 
   return (
@@ -767,9 +757,23 @@ export default function App() {
                 color: tab === t.id ? '#e2e8f0' : '#64748b',
                 fontSize: 13, fontFamily: "'Syne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 600,
                 transition: 'all 0.15s',
-                display: 'inline-flex', alignItems: 'center', gap: 6,
               }}
             >
+              {t.id === 'lista' ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              )}
               {t.label}
             </button>
           ))}
