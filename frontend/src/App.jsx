@@ -18,7 +18,7 @@ const Icons = {
   box: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
 }
 
-// ── Estilos globales inyectados en JS (sin archivo CSS externo) ──
+// Estilos globales inyectados en JS  
 const GlobalStyles = () => (
   <style>{`
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -213,7 +213,7 @@ const GlobalStyles = () => (
   `}</style>
 )
 
-// ── Colores de estado ──
+// Colores de estado 
 const STATUS_COLORS = {
   activo: { bg: '#0a2a1a', border: '#00ff88', text: '#00ff88' },
   inactivo: { bg: '#1a1a0a', border: '#ffaa00', text: '#ffaa00' },
@@ -222,10 +222,10 @@ const STATUS_COLORS = {
 
 const LANGUAGES = ['Python', 'Node.js']
 
-// ── Componente: Toast Notification ──
+// Componente: Toast Notification 
 function Toast({ message, type = 'success', onClose }) {
   useEffect(() => {
-    // Dismiss automatically after 3 seconds
+    // Quitar automaticamente despues de 3 seg
     const timer = setTimeout(onClose, 3000)
     return () => clearTimeout(timer)
   }, [onClose])
@@ -256,7 +256,7 @@ function Toast({ message, type = 'success', onClose }) {
 
   return (
     <div className="toast-enter" style={{
-      position: 'fixed', bottom: 24, right: 24, zIndex: 9999, // Moved to bottom-right
+      position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
       background: bgColor, border: `1px solid ${borderColor}`, borderRadius: 8,
       padding: '12px 16px', color: textColor, fontSize: 13, fontWeight: 500,
       display: 'flex', alignItems: 'center', gap: 10, maxWidth: 400,
@@ -268,7 +268,7 @@ function Toast({ message, type = 'success', onClose }) {
   )
 }
 
-// ── Componente: Badge de estado ──
+// Componente: Badge de estado 
 function StatusBadge({ status }) {
   const c = STATUS_COLORS[status] || STATUS_COLORS.inactivo
   return (
@@ -287,7 +287,7 @@ function StatusBadge({ status }) {
   )
 }
 
-// ── Componente: Botón ──
+// Componente: Botón 
 function Btn({ children, onClick, variant = 'primary', disabled, small, style = {} }) {
   const variants = {
     primary: { background: '#00d4ff', color: '#080c10', padding: small ? '6px 14px' : '10px 22px', fontSize: small ? 12 : 14 },
@@ -302,7 +302,7 @@ function Btn({ children, onClick, variant = 'primary', disabled, small, style = 
   )
 }
 
-// ── Vista: Crear microservicio ──
+// Vista: Crear microservicio 
 function CreateView({ onCreated }) {
   const [form, setForm] = useState({ name: '', description: '', language: 'Python', code: '' })
   const [errors, setErrors] = useState({})
@@ -337,7 +337,7 @@ http.createServer((req, res) => {
 }).listen(8080)`
   }
 
-  // ── Funciones de validación ──
+  // Funciones de validación 
   const validateName = (value) => {
     if (!value.trim()) return 'El nombre es obligatorio'
     if (value.length < 3) return 'El nombre debe tener al menos 3 caracteres'
@@ -366,7 +366,7 @@ http.createServer((req, res) => {
     return !value.includes('8080') ? 'El código no menciona el puerto 8080. Asegúrate de que tu servidor escuche en ese puerto.' : null
   }
 
-  // ── Manejo de cambios de campo ──
+  // Manejo de cambios de campo 
   const handleFieldChange = (field, value) => {
     setForm(f => ({ ...f, [field]: value }))
     setErrors(e => {
@@ -380,7 +380,7 @@ http.createServer((req, res) => {
     else setWarnings(w => { const nw = { ...w }; delete nw[field]; return nw })
   }
 
-  // ── Manejo de blur de campo ──
+  // Manejo de blur de campo 
   const handleFieldBlur = (field) => {
     setTouched(t => ({ ...t, [field]: true }))
 
@@ -402,7 +402,7 @@ http.createServer((req, res) => {
     else setWarnings(w => { const nw = { ...w }; delete nw[field]; return nw })
   }
 
-  // ── Envío del formulario ──
+  // Envío del formulario 
   async function handleSubmit() {
     setTouched({ name: true, language: true, description: true, code: true })
 
@@ -579,7 +579,7 @@ http.createServer((req, res) => {
   )
 }
 
-// ── Vista: Lista de microservicios ──
+// Vista: Lista de microservicios 
 function ListaView({ services, onAction, loading, onSwitchTab }) {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
@@ -661,10 +661,10 @@ function ListaView({ services, onAction, loading, onSwitchTab }) {
           {/* Acciones */}
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             {svc.status === 'activo'
-              ? <button title="Pausar" onClick={() => onAction(svc.id, 'stop')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
-              : <button title="Activar" onClick={() => onAction(svc.id, 'start')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="#00ff88" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+              ? <button title="Pausar" onClick={() => onAction(svc.id, 'stop')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg></button>
+              : <button title="Activar" onClick={() => onAction(svc.id, 'start')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="#00ff88" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg></button>
             }
-            <button title="Eliminar" onClick={() => onAction(svc.id, 'delete')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+            <button title="Eliminar" onClick={() => onAction(svc.id, 'delete')} style={{ width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" /></svg></button>
           </div>
         </div>
       ))}
@@ -672,7 +672,7 @@ function ListaView({ services, onAction, loading, onSwitchTab }) {
   )
 }
 
-// ── App principal ──
+// App principal 
 export default function App() {
   const [tab, setTab] = useState('lista')
   const [services, setServices] = useState([])
@@ -759,9 +759,9 @@ export default function App() {
               }}
             >
               {t.id === 'lista' ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
               )}
               {t.label}
             </button>

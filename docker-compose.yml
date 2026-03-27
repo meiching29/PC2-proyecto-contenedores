@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
 
-  # ── Frontend: Dashboard en React ──────────────────────────────────
+  # Frontend: Dashboard en React
   frontend:
     build: ./frontend
     ports:
@@ -12,23 +12,17 @@ services:
     depends_on:
       - backend
 
-  # ── Backend: Orquestador Node.js + Express ────────────────────────
+  # Backend: Orquestador Node.js + Express
   backend:
     build: ./backend
     ports:
       - "4000:4000"
     environment:
-      # En Windows Docker expone su API por TCP.
-      # El backend usa esta variable para conectarse a Docker.
       - DOCKER_HOST=tcp://host.docker.internal:2375
-    # Esto permite que el contenedor del backend acceda
-    # al Docker del host (necesario para crear contenedores dinámicamente)
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      # Carpeta donde se guardan los builds temporales de cada microservicio
       - ./backend/builds:/app/builds
-      # Archivo de registro de microservicios (persiste entre reinicios)
       - ./backend/services.json:/app/services.json
 
 networks:

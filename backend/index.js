@@ -8,12 +8,11 @@ const { execSync } = require('child_process')
 const app = express()
 const PORT = 4000
 
-// ── Conexión a Docker ──────────────────────────────────────────────
+// CONEXIÓN A DOCKER
 // Usa DOCKER_HOST si está definido (dentro de Docker en Windows)
 // Si no, detecta automáticamente según el sistema operativo
 function createDockerConnection() {
     if (process.env.DOCKER_HOST) {
-        // Formato: tcp://host.docker.internal:2375
         const url = new URL(process.env.DOCKER_HOST)
         return new Docker({ host: url.hostname, port: parseInt(url.port) })
     }
@@ -25,11 +24,11 @@ function createDockerConnection() {
 
 const docker = createDockerConnection()
 
-// ── Middleware ─────────────────────────────────────────────────────
+// MIDDLEWARE
 app.use(cors())
 app.use(express.json())
 
-// ── Registro de microservicios (archivo JSON simple) ───────────────
+// REGISTRO DE MICROSERVICIOS (archivo JSON simple)
 const DB_PATH = path.join(__dirname, 'services.json')
 
 function readServices() {
@@ -44,7 +43,7 @@ function writeServices(services) {
     fs.writeFileSync(DB_PATH, JSON.stringify(services, null, 2))
 }
 
-// ── Puerto libre ───────────────────────────────────────────────────
+// PUERTO LIBRE
 function getNextPort() {
     const services = readServices()
     const usedPorts = services.map(s => s.port).filter(Boolean)
@@ -53,7 +52,7 @@ function getNextPort() {
     return port
 }
 
-// ── Generar Dockerfile según lenguaje ─────────────────────────────
+// GENERAR DOCKERFILE SEGÚN LENGUAJE
 function generateDockerfile(language) {
     if (language === 'Python') {
         return `FROM python:3.11-alpine
@@ -74,16 +73,14 @@ CMD ["node", "main.js"]`
     throw new Error(`Lenguaje no soportado: ${language}`)
 }
 
-// ── Nombre del archivo según lenguaje ─────────────────────────────
+// NOMBRE DEL ARCHIVO SEGÚN LENGUAJE
 function getFileName(language) {
     if (language === 'Python') return 'main.py'
     if (language === 'Node.js') return 'main.js'
     throw new Error(`Lenguaje no soportado: ${language}`)
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  ENDPOINTS
-// ══════════════════════════════════════════════════════════════════
+// ENDPOINTS
 
 // GET /microservices — listar todos
 app.get('/microservices', (req, res) => {
@@ -108,12 +105,12 @@ app.post('/microservices', async (req, res) => {
     const buildDir = path.join(__dirname, 'builds', id)
 
     try {
-        // 1. Crear carpeta temporal con el código y el Dockerfile
+        // Crear carpeta temporal con el código y el Dockerfile
         fs.mkdirSync(buildDir, { recursive: true })
         fs.writeFileSync(path.join(buildDir, getFileName(language)), code)
         fs.writeFileSync(path.join(buildDir, 'Dockerfile'), generateDockerfile(language))
 
-        // 2. Build de la imagen Docker
+        // Build de la imagen Docker
         console.log(`[${id}] Construyendo imagen...`)
         const buildStream = await docker.buildImage(
             { context: buildDir, src: ['Dockerfile', getFileName(language)] },
@@ -128,7 +125,7 @@ app.post('/microservices', async (req, res) => {
             })
         })
 
-        // 3. Correr el contenedor
+        // Correr el contenedor
         console.log(`[${id}] Lanzando contenedor en puerto ${port}...`)
         const container = await docker.createContainer({
             Image: id,
@@ -141,7 +138,7 @@ app.post('/microservices', async (req, res) => {
         })
         await container.start()
 
-        // 4. Guardar en el registro
+        // Guardar en el registro
         const newService = {
             id,
             name,
@@ -211,7 +208,7 @@ app.delete('/microservices/:id', async (req, res) => {
         // Detener y eliminar contenedor
         try {
             const container = docker.getContainer(id)
-            await container.stop().catch(() => { }) // ignorar si ya estaba detenido
+            await container.stop().catch(() => { }) // Se ignora si ya esta detenido
             await container.remove()
         } catch { }
 
@@ -235,7 +232,7 @@ app.delete('/microservices/:id', async (req, res) => {
     }
 })
 
-// ── Arrancar servidor ──────────────────────────────────────────────
+// Arrancar servidor 
 app.listen(PORT, () => {
     console.log(`\n Backend corriendo en http://localhost:${PORT}`)
     console.log(`   Conectado a Docker: ${process.platform === 'win32' ? 'TCP 2375' : 'Unix socket'}`)
