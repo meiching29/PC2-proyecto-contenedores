@@ -17,13 +17,12 @@ services:
     build: ./backend
     ports:
       - "4000:4000"
-    environment:
-      - DOCKER_HOST=tcp://host.docker.internal:2375
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./backend/builds:/app/builds
       - ./backend/services.json:/app/services.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   default:

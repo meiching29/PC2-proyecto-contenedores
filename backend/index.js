@@ -16,9 +16,6 @@ function createDockerConnection() {
         const url = new URL(process.env.DOCKER_HOST)
         return new Docker({ host: url.hostname, port: parseInt(url.port) })
     }
-    if (process.platform === 'win32') {
-        return new Docker({ host: '127.0.0.1', port: 2375 })
-    }
     return new Docker({ socketPath: '/var/run/docker.sock' })
 }
 
